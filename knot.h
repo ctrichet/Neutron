@@ -11,13 +11,14 @@ class Knot
 {
   private:
 
+    static std::array<std::array<unsigned int, 2>, 2> bestMove; //TODO replace 2
     unsigned int        depth;
     ScoreType<Score>    *score;
     State               *state;
-    Progress            *progress;
     Knot                *next;
     
   public:
+
     Knot();
     Knot(State *state, unsigned int depth = 0);
     ~Knot();
