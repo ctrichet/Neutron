@@ -17,10 +17,16 @@
 #define LAST_ROW            4
 #define MIDDLE              2
 #define DIRECTIONS          8
+#define LAST_DIR            7
+#define LAST_PROTON         4
 #define PROTON              1
 #define ROW                 0
 #define COL                 1
 #define TARGET              0
+
+#define MAT                 0
+#define MOVE                1
+#define NULL                2
 
 class State 
 {
@@ -41,7 +47,11 @@ class State
     ~State();
 
     int computeScore();
-    State *simulate(bool firstMove = False);
+    unsigned int moveProton(bool save = false, bool firstMove = false);
+    unsigned int moveNeutron(bool save = false, bool firstMove = false);
+    unsigned int changeProtonDirection(bool save = false, bool firstMove = false);
+    unsigned int changeNeutronDirection(bool save = false, bool firstMove = false);
+    unsigned int changeTargetedNeutron(bool save = false, bool firstMove = false);
     
 };
 
