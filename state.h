@@ -6,6 +6,7 @@
 #define NB_PLAYERS          2
 #define BOARD_DIM           2
 #define WIDTH               5
+#define DIRECTIONS          8
 #define EMPTY              -1
 #define PLAYER0             0
 #define PLAYER1             1
@@ -18,10 +19,14 @@ class State
 {
   private:
 
+    static const int moves[8];
+
     bool    activePlayer;
     std::array<std::array<int, WIDTH>, WIDTH> board;
     std::array<std::array<std:array<unsigned int, BOARD_DIM>, NB_PROTONS>, NB_PLAYERS> protons;
     std::array<unsigned int, BOARD_DIM> neutron;
+
+    unsigned int getNbProtonMoves(unsigned int proton, bool player) const;
 
   public:
 
@@ -29,7 +34,7 @@ class State
     ~State();
 
     int computeScore() const;
-    
+    unsigned int getNbProtonMoves(unsigned int proton, bool player) const;    
 };
 
 #endif

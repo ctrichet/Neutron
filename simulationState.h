@@ -6,7 +6,6 @@
 
 #define PROGRESS_COUNTERS   3
 #define PENDING_MOVES       3
-#define DIRECTIONS          8
 #define LAST_DIR            7
 #define LAST_PROTON         4
 #define PROTON              1
@@ -23,7 +22,6 @@ class SimulationState : public State
 {
   private:
 
-    static const int moves[8];
     static std::array<int, PENDING_MOVES> pendingProtonMove;
     static std::array<int, BOARD_DIM> pendingNeutronMove;
 
