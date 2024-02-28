@@ -18,8 +18,8 @@ SimulationState::~SimulationState()
 unsigned int SimulationState::moveProton()
 {
     unsigned int newRow, newCol;
-    int rowMove = SimulationState::moves[this->progressCounters[PROTON]]; //TODO Regrouper ligne colonne ....
-    int colMove = SimulationState::moves[(this->progressCounters[PROTON] + 2) % DIRECTIONS];
+    int rowMove = State::moves[this->progressCounters[PROTON]]; //TODO Regrouper ligne colonne ....
+    int colMove = State::moves[(this->progressCounters[PROTON] + 2) % DIRECTIONS];
     int row = this->protons[this->activePlayer][this->progressCounters[TARGET]][ROW] + rowMove;
     int col = this->protons[this->activePlayer][this->progressCounters[TARGET]][COL] + colMove;
     if(row < FIRST_ROW or row > LAST_ROW or col < FIRST_ROW or col > LAST_ROW or this->board[row][col] != EMPTY)
@@ -34,7 +34,7 @@ unsigned int SimulationState::moveProton()
         newCol = col;
         row += rowMove;
         col += colMove; 
-    } while(row > FIRST_ROW & row < LAST_ROW & col > FIRST_ROW & col < LAST_ROW & this->board[row][col] == EMPTY);
+    } while(row > FIRST_ROW && row < LAST_ROW && col > FIRST_ROW && col < LAST_ROW && this->board[row][col] == EMPTY);
     SimulationState::pendingProtonMove = {this->progressCounters[TARGET], newRow, newCol};
     return MOVE;
 }
@@ -42,8 +42,8 @@ unsigned int SimulationState::moveProton()
 unsigned int SimulationState::moveNeutron()
 {
     unsigned int newRow, newCol;
-    int rowMove = SimulationState::moves[this->progressCounters[NEUTRON]];
-    int colMove = SimulationState::moves[(this->progressCounters[NEUTRON] + 2) % DIRECTIONS];
+    int rowMove = State::moves[this->progressCounters[NEUTRON]];
+    int colMove = State::moves[(this->progressCounters[NEUTRON] + 2) % DIRECTIONS];
     int row = this->neutron[ROW] + rowMove;
     int col = this->neutron[COL] + colMove;
     if(row < FIRST_ROW or row > LAST_ROW or col < FIRST_ROW or col > LAST_ROW or this->board[row][col] != EMPTY)
@@ -54,7 +54,7 @@ unsigned int SimulationState::moveNeutron()
         newCol = col;
         row += rowMove;
         col += colMove;
-    } while(row > FIRST_ROW & row < LAST_ROW & col > FIRST_ROW & col < LAST_ROW & this->board[row][col] == EMPTY);
+    } while(row > FIRST_ROW && row < LAST_ROW && col > FIRST_ROW && col < LAST_ROW && this->board[row][col] == EMPTY);
     SimulationState::pendingNeutronMove = {newRow, newCol};
     if(row % LAST_ROW)
     {
