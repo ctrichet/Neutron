@@ -1,15 +1,17 @@
 #include "simulationState.h"
+#include "state.h"
+
 //TODO DeepCopy statiques ou non! TT vérifier +bestMoves => KNOT!!!!!
 SimulationState::SimulationState(State *state, bool activePlayer, bool firstMove /*=false*/) : State(state, activePlayer, firstMove)
-{    
+{
     /*Initialisation des compteurs de progression*/
     std::fill(progressCounters.begin(), progressCounters.end(), 0);
 
-    this->state->applyPendingMoves();
+    this->applyPendingMoves();
 
     /*Réinitialisation du coup en cours*/
-    SimulationState::pendingProtonMove.fill(EMPTY);
-    SimulationState::pendingNeutronMove.fill(EMPTY);
+    SimulationState::pendingProtonMove.fill(DEFAULT_MOVE);
+    SimulationState::pendingNeutronMove.fill(DEFAULT_MOVE);
 }
 
 SimulationState::~SimulationState()
@@ -25,7 +27,7 @@ unsigned int SimulationState::moveProton()
     if(row < FIRST_ROW or row > LAST_ROW or col < FIRST_ROW or col > LAST_ROW or this->board[row][col] != EMPTY)
     {
         if(this->firstMove)
-            return NULL;
+            return NONE;
         return changeNeutronDirection();
     }
     do
@@ -33,7 +35,7 @@ unsigned int SimulationState::moveProton()
         newRow = row;
         newCol = col;
         row += rowMove;
-        col += colMove; 
+        col += colMove;
     } while(row > FIRST_ROW && row < LAST_ROW && col > FIRST_ROW && col < LAST_ROW && this->board[row][col] == EMPTY);
     SimulationState::pendingProtonMove = {this->progressCounters[TARGET], newRow, newCol};
     std::copy(SimulationState::pendingProtonMove.begin(), SimulationState::pendingProtonMove.end(), SimulationState::bestProtonMove.begin()); //TODO trop con, à faire if(! depth)!!!!
@@ -69,33 +71,33 @@ unsigned int SimulationState::moveNeutron()
 
 unsigned int SimulationState::changeProtonDirection()
 {
-    if(progressCounters[PROTON] == LAST_DIR)
+    if(this->progressCounters[PROTON] == LAST_DIR)
     {
-        progressCounters[PROTON] = 0;
-        return changeTargetedProton();
+        this->progressCounters[PROTON] = 0;
+        return this->changeTargetedProton();
     }
     ++progressCounters[PROTON];
-    return moveProton();
+    return this->moveProton();
 
 }
 
 unsigned int SimulationState::changeNeutronDirection()
 {
-    if(progressCounters[NEUTRON] == LAST_DIR)
-        return NULL;
+    if(this->progressCounters[NEUTRON] == LAST_DIR)
+        return NONE;
     ++progressCounters[NEUTRON];
-    return moveNeutron();
+    return this->moveNeutron();
 }
 
 unsigned int SimulationState::changeTargetedProton()
 {
-    if(progressCounters[TARGET] == LAST_PROTON)
+    if(this->progressCounters[TARGET] == LAST_PROTON)
     {
         if(this->firstMove)
-            return NULL;
-        progressCounters[TARGET] = 0;
-        return changeNeutronDirection();
+            return NONE;
+        this->progressCounters[TARGET] = 0;
+        return this->changeNeutronDirection();
     }
     ++progressCounters[TARGET];
-    return moveProton();
+    return this->moveProton();
 }
