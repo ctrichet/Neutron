@@ -1,9 +1,10 @@
 #include <array>
 #include "state.h"
+#include "simulationState.h"
 
-State::moves = {0, -1, -1, -1, 0, 1, 1, 1}; //TODO => main()
+//State::moves = {0, -1, -1, -1, 0, 1, 1, 1}; //TODO => main()
 
-State::State(State *previousState, bool activePlayer, bool firstMove /*=false*/) : activePlayer(activePlayer), firstMove(firstMove)
+State::State(const State *previousState, bool activePlayer, bool firstMove /*=false*/) : activePlayer(activePlayer), firstMove(firstMove)
 {
     /*Copie du plateau*/
     for (unsigned int row = 0; row < WIDTH; ++row)
@@ -47,14 +48,14 @@ State::State(bool activePlayer /*=PLAYER0*/) : activePlayer(activePlayer), first
 
     /*Initialisation des coordonnées du neutron*/
     neutron = {MIDDLE, MIDDLE};
-    
+
 }
 
 State::~State()
 {}
 
-void applyPendingMoves()
-{
+void State::applyPendingMoves()
+{/* //TODO std::array SimulationState::getPendingNeutronMove();
     this->board[SimulationState::pendingNeutronMove[ROW]][SimulationState::pendingNeutronMove[COL]] = NEUTRON;
     this->board[this->neutron[ROW]][this->neutron[COL]] = EMPTY;
     this->neutron = {SimulationState::pendingNeutronMove[ROW], SimulationState::pendingNeutronMove[COL]};
@@ -62,9 +63,14 @@ void applyPendingMoves()
     this->board[SimulationState::pendingProtonMove[PENDING_ROW]][SimulationState::pendingProtonMove[PENDING_COL]] = PROTON;
     this->board[this->protons[! this->joueurActif][SimulationState::pendingProtonMove[TARGET]][ROW]][this->protons[! this->joueurActif][SimulationState::pendingProtonMove[TARGET]][COL]] = EMPTY;
     this->protons[! this->joueurActif][SimulationState::pendingProtonMove[TARGET]] = {SimulationState::pendingProtonMove[ROW], SimulationState::pendingProtonMove[COL]};
+*/}
+
+bool State::getFirstMove() const
+{
+    return this->firstMove;
 }
 
-int State::computeScore()
+int State::computeScore() const
 {
     int score = MIDDLE - this->neutron[ROW];
     if(this->neutron[ROW] == MIDDLE && this->neutron[COL] < MIDDLE);
@@ -75,17 +81,17 @@ int State::computeScore()
         score -= this->getNbProtonMoves(proton, PLAYER1);
         score += this->protons[PLAYER0][proton][ROW];
         score += this->protons[PLAYER1][proton][ROW];
-    }     
+    }
     return score;
 }
 
-unsigned int State::getNbProtonMoves(unsigned int proton, bool player)
+unsigned int State::getNbProtonMoves(unsigned int proton, bool player) const
 {
     unsigned int nbMoves = 0;
     int newRow, newCol;
-    row = this->protons[player][proton][ROW];
-    col = this->protons[player][proton][COL];    
-    for(unsigned int direction = 0; direction < DIRECTIONS)
+    unsigned int row = this->protons[player][proton][ROW];
+    unsigned int col = this->protons[player][proton][COL];
+    for(unsigned int direction = 0; direction < DIRECTIONS; ++direction)
     {
         newRow = State::moves[direction] + row;
         newCol = State::moves[(direction + 2) % 8] + col;
