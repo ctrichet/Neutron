@@ -1,0 +1,82 @@
+#* ************************************************************************** *#
+#*                                                                            *#
+#*                                                                            *#
+#*   Makefile                                                                 *#
+#*                                                                            *#
+#*   By: Clement Trichet <clement.trichet.pro@gmail.com>                      *#
+#*                                                                            *#
+#*   Created: 2023/11/02 by Clement Trichet                                   *#
+#*   Updated: 2024/03/03 by Clement Trichet                                   *#
+#*                                                                            *#
+#* ************************************************************************** *#
+
+#* **************************** * VARIABLES * ******************************* *#
+
+ECHO	= @echo
+RM		= rm
+COMP	= @g++
+EDL		= @g++
+CCFLAGS	=  -Wall -I. -I./test #-pedantic -std=c++11 -Warning -Werror -g -D
+LDFLAGS =
+RMFLAGS	= -f
+LIBS	= # -lm (math) -lpthread (thread)
+
+TEST_FOLDER		= ./src/test
+MAIN_FOLDER		= ./src/main
+
+INT		= $(MAIN_FOLDER)/state.h # simulationState.h knot.h
+MAIN	= main.cpp									#A voir si plusieurs exécutables
+FRIEND	:= $(INT:%.h = %Friend.cpp)
+REAL	:= $(INT:%.h = %.cpp) $(FRIEND) $(MAIN)
+OBJ		:= $(REAL:%.h = %.o)   $(MAIN:%.h = %.o)
+EXE		= neutron.out
+CLEAN	= clean
+
+.PHONY : $(CLEAN)
+
+TARGET_TESTS = $(TEST_FOLDER)/unitTests.out
+TESTS = $(TEST_FOLDER)/stateUnitTest.out # $(TEST_FOLDER)/testUnitaireDame.out......
+TESTS_SRC := $(INT:%.h = %UnitTest.cpp) unitTest.cpp
+TESTS_OBJ := $(patsubst %.cpp, %.o, $(TESTS_SRC))
+
+#* ****************************** * RULES * ********************************* *#
+
+$(EXE) : $(OBJ)
+	$(EDL) -o $< $(LDFLAGS)
+
+%.o : %.cpp
+	$(COMP) -c $(CCFLAGS) $<
+
+$(CLEAN) :
+	$(ECHO) "Cleaning..."
+	$(RM) $(RMFLAGS) $(EXE) $(OBJ) core
+	$(RM) $(RMFLAGS) $(TARGETS) $(TARGET_TESTS) $(TESTS) $(TESTS_OBJ) *.o *.*~
+
+
+# Tests unitaires
+
+tests: $(TARGET_TESTS)
+	$(TARGET_TESTS) -l; \
+	$(TARGET_TESTS)
+
+unitTestState: $(TEST_FOLDER)/unitTestState.out
+	$(TEST_FOLDER)/unitTestState.out
+
+$(TEST_FOLDER)/unitTestState.out: $(DOSSIER_TESTS)/UnitTest.o $(DOSSIER_TESTS)/unitTestState.o state.o
+	$(EDL) $@ $^
+#testUnitaireDame: $(TEST_FOLDER)/testUnitaireDame.out
+#	$(TEST_FOLDER)/testUnitaireDame.out
+
+
+$(TARGET_TESTS): $(TESTS_OBJ) $(OBJ)
+	$(EDL) -o $@ $^
+
+#$(TEST_FOLDER)/testUnitaireHumain.out: $(TEST_FOLDER)/testsUnitaires.o $(TEST_FOLDER)/testUnitaireHumain.o Humain.o
+#	$(EDL) $@ $^
+
+#* *************************** * DEPENDENCIES * ***************************** *#
+
+main.o : main.h
+state.o : state.h state.cpp
+stateFriend.o : state.h state.cpp stateFriend.cpp
+unitTest.o : unitTest.cpp
