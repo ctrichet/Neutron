@@ -1,68 +1,95 @@
 #include "simulationState.h"
 #include "state.h"
 
-//TODO DeepCopy statiques ou non! TT vérifier +bestMoves => KNOT!!!!!
-SimulationState::SimulationState(State *state, bool activePlayer, bool firstMove /*=false*/) : State(state, activePlayer, firstMove)
+State   *SimulationState::afterProtonMovementState;
+State   *SimulationState::bestState = nullptr;
+State   *SimulationState::pendingState = nullptr;
+
+SimulationState::SimulationState(State *state, bool activePlayer, bool firstMove /*=false*/) : State(state, activePlayer, firstMove), afterNeutronMovementState(nullptr)
 {
     /*Initialisation des compteurs de progression*/
     std::fill(progressCounters.begin(), progressCounters.end(), 0);
-
-    this->applyPendingMoves();
-
-    /*Réinitialisation du coup en cours*/
-    SimulationState::pendingProtonMove.fill(DEFAULT_MOVE);
-    SimulationState::pendingNeutronMove.fill(DEFAULT_MOVE);
 }
 
 SimulationState::~SimulationState()
 {}
 
+State *SimulationState::getAfterNeutronMovementState()
+{
+    return this->afterNeutronMovementState;
+}
+void SimulationState::setAfterNeutronMovementState(State *state)
+{
+    this->afterNeutronMovementState = state;
+}
+
+State *SimulationState::getPendingState()
+{
+    return SimulationState::getPendingState();
+}
+void SimulationState::setPendingState(State *state)
+{
+    SimulationState::pendingState = nullptr;
+}
+
 unsigned int SimulationState::moveProton()
 {
-    unsigned int newRow, newCol;
-    int rowMove = State::moves[this->progressCounters[PROTON]]; //TODO Regrouper ligne colonne ....
+    int rowMove = State::moves[this->progressCounters[PROTON]];
     int colMove = State::moves[(this->progressCounters[PROTON] + 2) % DIRECTIONS];
-    int row = this->protons[this->activePlayer][this->progressCounters[TARGET]][ROW] + rowMove;
-    int col = this->protons[this->activePlayer][this->progressCounters[TARGET]][COL] + colMove;
-    if(row < FIRST_ROW or row > LAST_ROW or col < FIRST_ROW or col > LAST_ROW or this->board[row][col] != EMPTY)
+    unsigned int row = this->protons[this->activePlayer][this->progressCounters[TARGET]][ROW];
+    unsigned int col = this->protons[this->activePlayer][this->progressCounters[TARGET]][COL];
+    int newRow = row + rowMove;
+    int newCol = col + colMove;
+
+    State   *pendingState;
+    if(this->firstMove)
+        pendingState = this;
+    else
+        pendingState = this->afterNeutronMovementState;
+
+    if(outOfBoard(newRow, newCol) || pendingState->getBoard()[newRow][newCol] != EMPTY)
     {
-        if(this->firstMove)
-            return NONE;
-        return changeNeutronDirection();
+        return this->changeProtonDirection();
     }
+    if(SimulationState::afterProtonMovementState)
+        delete SimulationState::afterProtonMovementState;
+    SimulationState::afterProtonMovementState = new State(pendingState);//TODO à partir de this ou de afterNeut..
     do
     {
-        newRow = row;
-        newCol = col;
-        row += rowMove;
-        col += colMove;
-    } while(row > FIRST_ROW && row < LAST_ROW && col > FIRST_ROW && col < LAST_ROW && this->board[row][col] == EMPTY);
-    SimulationState::pendingProtonMove = {this->progressCounters[TARGET], newRow, newCol};
-    std::copy(SimulationState::pendingProtonMove.begin(), SimulationState::pendingProtonMove.end(), SimulationState::bestProtonMove.begin()); //TODO trop con, à faire if(! depth)!!!!
+        SimulationState::afterProtonMovementState->getBoard()[row][col] = EMPTY;
+        SimulationState::afterProtonMovementState->getBoard()[newRow][newCol] = PION;
+        row, col = newRow, newCol;
+        newRow += rowMove;
+        newCol += colMove;
+
+    } while(not outOfBoard(newRow, newCol) && SimulationState::afterProtonMovementState->getBoard()[newRow][newCol] == EMPTY);
     return DEFAULT;
 }
 
 unsigned int SimulationState::moveNeutron()
 {
-    unsigned int newRow, newCol;
     int rowMove = State::moves[this->progressCounters[NEUTRON]];
     int colMove = State::moves[(this->progressCounters[NEUTRON] + 2) % DIRECTIONS];
-    int row = this->neutron[ROW] + rowMove;
-    int col = this->neutron[COL] + colMove;
-    if(row < FIRST_ROW or row > LAST_ROW or col < FIRST_ROW or col > LAST_ROW or this->board[row][col] != EMPTY)
+    unsigned int row = this->neutron[ROW];
+    unsigned int col = this->neutron[COL];
+    int newRow = row + rowMove;
+    int newCol = col + colMove;
+    if(outOfBoard(newRow, newCol) || this->board[row][col] != EMPTY)
         return changeNeutronDirection();
+    if(this->afterNeutronMovementState)
+        delete this->afterNeutronMovementState;
+    this->afterNeutronMovementState = new State(this);//TODO vérifier
     do
     {
-        newRow = row;
-        newCol = col;
-        row += rowMove;
-        col += colMove;
-    } while(row > FIRST_ROW && row < LAST_ROW && col > FIRST_ROW && col < LAST_ROW && this->board[row][col] == EMPTY);
-    SimulationState::pendingNeutronMove = {newRow, newCol};
-    std::copy(SimulationState::pendingNeutronMove.begin(), SimulationState::pendingNeutronMove.end(), SimulationState::bestNeutronMove.begin());//TODO trop con, à faire if(! depth)!!!!
+        this->afterNeutronMovementState->getBoard()[row][col] = EMPTY;
+        this->afterNeutronMovementState->getBoard()[newRow][newCol] = PION;
+        row, col = newRow, newCol;
+        newRow += rowMove;
+        newCol += colMove;
+    } while(! outOfBoard(newRow, newCol) && this->board[newRow][newCol] == EMPTY);
     if(newRow % LAST_ROW)
     {
-        moveProton();
+        return this->moveProton();
     }
     else if(newRow)
         return LOSE;
@@ -100,4 +127,11 @@ unsigned int SimulationState::changeTargetedProton()
     }
     ++progressCounters[TARGET];
     return this->moveProton();
+}
+
+bool outOfBoard(int row, int col) //TODO ->Main
+{
+    if(row < FIRST_ROW or row > LAST_ROW or col < FIRST_ROW or col > LAST_ROW)
+        return true;
+    return false;
 }
