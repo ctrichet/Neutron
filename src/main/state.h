@@ -15,6 +15,7 @@
 #define FIRST_ROW           0
 #define LAST_ROW            4
 #define MIDDLE              2
+#define PION                1
 
 class State
 {
@@ -29,21 +30,33 @@ class State
     std::array<unsigned int, BOARD_DIM> neutron;
 
     void applyPendingMoves();
-    virtual unsigned int changeTargetedProton();
+
+    //MM virtual unsigned int changeTargetedProton();
+    virtual unsigned int changeTargetedProton() { return 0; };
 
   public:
 
     friend class StateFriend;
+
+    std::array<std::array<int, WIDTH>, WIDTH>& getBoard();
+
 
     State(bool activePlayer = PLAYER0);
     State(const State *previousState, bool activePlayer, bool firstMove =false);
 
     ~State();
 
-    virtual unsigned int moveProton();
-    virtual unsigned int moveNeutron();
-    virtual unsigned int changeProtonDirection();
-    virtual unsigned int changeNeutronDirection();
+    //MM virtual unsigned int moveProton();
+    virtual unsigned int moveProton() { return 0; };
+
+    //MM virtual unsigned int moveNeutron();
+    virtual unsigned int moveNeutron() { return 0; };
+
+    //MM virtual unsigned int changeProtonDirection();
+    virtual unsigned int changeProtonDirection() { return 0; };
+
+    //MM virtual unsigned int changeNeutronDirection();
+    virtual unsigned int changeNeutronDirection() { return 0; };
 
     bool getFirstMove() const;
     int computeScore() const;

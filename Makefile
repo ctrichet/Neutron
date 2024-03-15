@@ -3,9 +3,12 @@ CXX=g++ $(CFLAGS) -c
 LD=g++ -o
 TARGETS = neutron.out
 SRC_FOLDER = ./src/main
+#MM OBJ_FOLDER
+OBJ_FOLDER = ./obj/main
 ECHO = @echo
 HELP = help
-.PHONY: $(HELP)
+#MM .PHONY: $(HELP)
+.PHONY: $(HELP) efface
 
 help:
 	$(ECHO) "Voici les cibles disponibles"
@@ -18,22 +21,29 @@ help:
 
 all: $(TARGETS)
 
-neutron.out: /neutron.o $(SRC_FOLDER)/knot.o $(SRC_FOLDER)/state.o $(SRC_FOLDER)/simulationState.o
+#MM neutron.out: /neutron.o $(SRC_FOLDER)/knot.o $(SRC_FOLDER)/state.o $(SRC_FOLDER)/simulationState.o
+neutron.out: $(OBJ_FOLDER)/neutron.o $(OBJ_FOLDER)/state.o $(OBJ_FOLDER)/simulationState.o $(OBJ_FOLDER)/stateFriend.o $(OBJ_FOLDER)/knot.o
 	$(LD) $@ $^
 
-neutron.o: $(SRC_FOLDER)/neutron.cpp $(SRC_FOLDER)/knot.h $(SRC_FOLDER)/state.h $(SRC_FOLDER)/simulationState.h
-	$(CXX) $<
-
-knot.o: $(SRC_FOLDER)/knot.cpp $(SRC_FOLDER)/knot.h $(SRC_FOLDER)/state.h $(SRC_FOLDER)/simulationState.h
+#MM neutron.o: $(SRC_FOLDER)/neutron.cpp $(SRC_FOLDER)/knot.h $(SRC_FOLDER)/state.h $(SRC_FOLDER)/simulationState.h
+$(OBJ_FOLDER)/neutron.o: $(SRC_FOLDER)/neutron.cpp $(SRC_FOLDER)/knot.h $(SRC_FOLDER)/state.h $(SRC_FOLDER)/simulationState.h
+	@#MM $(CXX) $<
 	$(CXX) $< -o $@
 
-state.o: $(SRC_FOLDER)/state.cpp  $(SRC_FOLDER)/state.h #$(SRC_FOLDER)/simulationState.h
+#MM knot.o: $(SRC_FOLDER)/knot.cpp $(SRC_FOLDER)/knot.h $(SRC_FOLDER)/state.h $(SRC_FOLDER)/simulationState.h
+$(OBJ_FOLDER)/knot.o: $(SRC_FOLDER)/knot.cpp $(SRC_FOLDER)/knot.h $(SRC_FOLDER)/state.h $(SRC_FOLDER)/simulationState.h
 	$(CXX) $< -o $@
 
-simulationState.o: $(SRC_FOLDER)/simulationState.cpp $(SRC_FOLDER)/simulationState.h $(SRC_FOLDER)/state.h
+#MM state.o: $(SRC_FOLDER)/state.cpp  $(SRC_FOLDER)/state.h #$(SRC_FOLDER)/simulationState.h
+$(OBJ_FOLDER)/state.o: $(SRC_FOLDER)/state.cpp  $(SRC_FOLDER)/state.h #$(SRC_FOLDER)/simulationState.h
 	$(CXX) $< -o $@
 
-stateFriend.o: $(SRC_FOLDER)/stateFriend.cpp  $(SRC_FOLDER)/state.h $(SRC_FOLDER)/state.cpp
+#MM simulationState.o: $(SRC_FOLDER)/simulationState.cpp $(SRC_FOLDER)/simulationState.h $(SRC_FOLDER)/state.h
+$(OBJ_FOLDER)/simulationState.o: $(SRC_FOLDER)/simulationState.cpp $(SRC_FOLDER)/simulationState.h $(SRC_FOLDER)/state.h
+	$(CXX) $< -o $@
+
+#MM stateFriend.o: $(SRC_FOLDER)/stateFriend.cpp  $(SRC_FOLDER)/state.h $(SRC_FOLDER)/state.cpp
+$(OBJ_FOLDER)/stateFriend.o: $(SRC_FOLDER)/stateFriend.cpp  $(SRC_FOLDER)/state.h $(SRC_FOLDER)/state.cpp
 	$(CXX) $< -o $@
 
 
@@ -75,3 +85,7 @@ $(TEST_FOLDER)/knotUnitTest.out: $(TEST_FOLDER)/unitTests.o $(TEST_FOLDER)/knotU
 
 clean:
 	rm -f $(TARGETS) $(TARGET_TESTS) $(TESTS_LIST) $(TESTS_LIST_OBJ) *.o *.*~
+
+#MM Ajout de la cible efface
+efface:
+	rm -f $(TARGETS) $(OBJ_FOLDER)/*.o

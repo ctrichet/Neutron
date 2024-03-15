@@ -26,21 +26,28 @@
 class SimulationState : public State
 {
   private:
-
-    static std::array<unsigned int, PENDING_MOVES> pendingProtonMove;
-    static std::array<unsigned int, BOARD_DIM>     pendingNeutronMove;
-
     std::array<unsigned , PROGRESS_COUNTERS> progressCounters;
 
     unsigned int changeTargetedProton();
 
+    State  *afterNeutronMovementState;
+
   public:
 
-    static std::array<int, PENDING_MOVES> bestProtonMove;
-    static std::array<int, BOARD_DIM>     bestNeutronMove;
+    static State  *afterProtonMovementState;
+
+    static State  *bestState;
+    static State  *pendingState;
 
     SimulationState(State *state, bool activePlayer, bool firstMove =false);
     ~SimulationState();
+
+    State *getAfterNeutronMovementState();
+    void setAfterNeutronMovementState(State *state);
+    static State *getPendingState();
+    static void setPendingState(State *state);
+
+
 
     unsigned int moveProton();
     unsigned int moveNeutron();
@@ -48,5 +55,7 @@ class SimulationState : public State
     unsigned int changeNeutronDirection();
 
 };
+
+bool outOfBoard(int row, int col);//TODO -> Main
 
 #endif

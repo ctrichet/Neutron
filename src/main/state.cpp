@@ -2,7 +2,7 @@
 #include "state.h"
 #include "simulationState.h"
 
-//State::moves = {0, -1, -1, -1, 0, 1, 1, 1}; //TODO => main()
+const int State::moves[8] = {0, -1, -1, -1, 0, 1, 1, 1}; //TODO => main()
 
 State::State(const State *previousState, bool activePlayer, bool firstMove /*=false*/) : activePlayer(activePlayer), firstMove(firstMove)
 {
@@ -53,6 +53,12 @@ State::State(bool activePlayer /*=PLAYER0*/) : activePlayer(activePlayer), first
 
 State::~State()
 {}
+
+std::array<std::array<int, WIDTH>, WIDTH>& State::getBoard()
+{
+    return this->board;
+}
+
 
 void State::applyPendingMoves()
 {/* //TODO std::array SimulationState::getPendingNeutronMove();
